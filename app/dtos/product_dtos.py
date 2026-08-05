@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 
-from app.dtos.common_dtos import LinkDTO
-
+from app.dtos.common_dtos import AccessibilityDTO, LinkDTO
 
 class ProductOutDTO(BaseModel):
     id: int
@@ -13,3 +12,4 @@ class ProductOutDTO(BaseModel):
     available_quantity: int = Field(ge=0)
     features: list[str]
     links: list[LinkDTO]
+    accessibility: list[AccessibilityDTO] | None = None
