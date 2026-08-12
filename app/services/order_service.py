@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 
 from app.data import CARTS, ORDERS, PRODUCTS, SUCCESSFUL_TEST_CARD
 from app.dtos.order_dtos import CheckoutInDTO
+from app.errors import APIErrorItem, APIException
 
 
 def place_order_from_cart(cart_id: str, checkout: CheckoutInDTO) -> dict:
@@ -14,7 +15,17 @@ def place_order_from_cart(cart_id: str, checkout: CheckoutInDTO) -> dict:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Cart is empty")
     normalized_card_number = checkout.payment.card_number.replace(" ", "").replace("-", "")
     if normalized_card_number != SUCCESSFUL_TEST_CARD:
-        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="Payment failed")
+        raise APIException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail="Payment failed",
+            errors=[
+                APIErrorItem(
+                    field="payment.card_number",
+                    message="Payment failed",
+                    suggestion="Use the successful test card number 4242 4242 4242 4242.",
+                )
+            ],
+        )
 
     order_items: list[dict] = []
     item_count = 0

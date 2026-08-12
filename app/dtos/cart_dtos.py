@@ -2,13 +2,31 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
-from app.accessibility import AccessibilityAnnotation, AccessibilityNudgeType, child_field_values
+from app.accessibility import (
+    AccessibilityAnnotation,
+    AccessibilityNudgeType,
+    ValidationAnnotation,
+    child_field_values,
+    link_label_targets,
+)
 from app.dtos.common_dtos import AccessibilityDTO, LinkDTO
 
 
+CartProductId = Annotated[int, ValidationAnnotation(suggestion="Use a product ID returned by GET /api/v1/products.")]
+CartQuantity = Annotated[
+    int,
+    Field(ge=1, le=5),
+    ValidationAnnotation(suggestion="Enter a whole number within the allowed range."),
+]
+
+
 class CartItemInDTO(BaseModel):
-    product_id: int
-    quantity: int = Field(ge=1, le=5)
+    product_id: CartProductId
+    quantity: CartQuantity
+
+
+class CartItemUpdateDTO(BaseModel):
+    quantity: CartQuantity
 
 
 class CartItemDTO(BaseModel):
@@ -18,6 +36,16 @@ class CartItemDTO(BaseModel):
     unit_price: float = Field(ge=0)
     line_total: float = Field(ge=0)
     currency: str
+    links: Annotated[
+        list[LinkDTO],
+        AccessibilityAnnotation(
+            sc="4.1.2",
+            type=AccessibilityNudgeType.ACCESSIBLE_NAME,
+            message="Use the link or button label as the accessible name of each cart-item action control.",
+            values_resolver=child_field_values("label"),
+            targets_resolver=link_label_targets,
+        ),
+    ]
 
 
 class CartDataDTO(BaseModel):

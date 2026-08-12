@@ -14,7 +14,11 @@ class AccessibilityNudgeType(str, Enum):
     LABELS_OR_INSTRUCTIONS = "labels-or-instructions"
 
 
+HttpMethod = Literal["GET", "POST", "PATCH", "DELETE"]
 ValuesResolver = Callable[[Any, Any | None], list[str] | None]
+TargetsResolver = Callable[[str, Any, Any | None], list[str] | None]
+ValidationSuggestionResolver = Callable[[dict[str, Any]], str | None]
+_ENDPOINT_ACCESSIBILITY: dict[str, tuple["AccessibilityAnnotation", ...]] = {}
 
 
 @dataclass(frozen=True)
@@ -23,15 +27,34 @@ class AccessibilityAnnotation:
     type: AccessibilityNudgeType
     message: str
     values_resolver: ValuesResolver | None = None
+    targets_resolver: TargetsResolver | None = None
+
+
+@dataclass(frozen=True)
+class ValidationAnnotation:
+    suggestion: str | None = None
+    suggestion_resolver: ValidationSuggestionResolver | None = None
 
 
 @dataclass(frozen=True)
 class LinkDefinition:
     href: str
     rel: str
-    type: Literal["GET", "POST"]
+    type: HttpMethod
     label: str
     accessibility: tuple[AccessibilityAnnotation, ...] = ()
+
+
+def accessibility(*annotations: AccessibilityAnnotation):
+    def decorate(function):
+        _ENDPOINT_ACCESSIBILITY[function.__name__] = _ENDPOINT_ACCESSIBILITY.get(function.__name__, ()) + annotations
+        return function
+
+    return decorate
+
+
+def get_endpoint_accessibility(endpoint_name: str) -> tuple[AccessibilityAnnotation, ...]:
+    return _ENDPOINT_ACCESSIBILITY.get(endpoint_name, ())
 
 
 def current_value_list(value: Any, _: Any | None = None) -> list[str] | None:
@@ -60,3 +83,10 @@ def child_field_values(field_name: str) -> ValuesResolver:
         return values or None
 
     return resolve
+
+
+def link_label_targets(path: str, value: Any, _: Any | None = None) -> list[str] | None:
+    if not isinstance(value, list):
+        return None
+    targets = [f"{path}[rel={link.rel}].label" for link in value if getattr(link, "rel", None) is not None]
+    return targets or None

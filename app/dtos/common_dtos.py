@@ -2,13 +2,13 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from app.accessibility import AccessibilityNudgeType
+from app.accessibility import AccessibilityNudgeType, HttpMethod
 
 
 class LinkDTO(BaseModel):
     href: str
     rel: str
-    type: Literal["GET", "POST"]
+    type: HttpMethod
     label: str
 
 

@@ -2,13 +2,22 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, EmailStr, Field
 
-from app.accessibility import AccessibilityAnnotation, AccessibilityNudgeType, child_field_values, current_value_list
+from app.accessibility import (
+    AccessibilityAnnotation,
+    AccessibilityNudgeType,
+    ValidationAnnotation,
+    child_field_values,
+    current_value_list,
+)
 from app.dtos.common_dtos import AccessibilityDTO, LinkDTO
 
 
 class CustomerInDTO(BaseModel):
     full_name: str = Field(min_length=1, max_length=100)
-    email: EmailStr
+    email: Annotated[
+        EmailStr,
+        ValidationAnnotation(suggestion="Enter a valid email address, for example name@example.com."),
+    ]
 
 
 class DeliveryAddressInDTO(BaseModel):
@@ -19,9 +28,21 @@ class DeliveryAddressInDTO(BaseModel):
 
 class PaymentInDTO(BaseModel):
     cardholder_name: str = Field(min_length=1, max_length=100)
-    card_number: str = Field(min_length=12, max_length=23)
-    expiry_date: str = Field(pattern=r"^\d{2}/\d{2}$")
-    security_code: str = Field(pattern=r"^\d{3,4}$")
+    card_number: Annotated[
+        str,
+        Field(min_length=12, max_length=23),
+        ValidationAnnotation(suggestion="Enter the complete test card number. Use 4242 4242 4242 4242 for success."),
+    ]
+    expiry_date: Annotated[
+        str,
+        Field(pattern=r"^\d{2}/\d{2}$"),
+        ValidationAnnotation(suggestion="Enter the expiry date in MM/YY format, for example 12/30."),
+    ]
+    security_code: Annotated[
+        str,
+        Field(pattern=r"^\d{3,4}$"),
+        ValidationAnnotation(suggestion="Enter a three or four digit security code."),
+    ]
 
 
 class CheckoutInDTO(BaseModel):
