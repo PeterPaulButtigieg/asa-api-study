@@ -28,21 +28,27 @@ origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    print("DONT FORGET TO ALLOW PARTICPANT DEVICE ON CORS")
     yield
 
 
 app = FastAPI(
     title="Study Checkout API",
-    description="Dummy product, cart, and checkout API for MSc dissertation study.",
+    description="Dummy product and checkout API for MSc dissertation study.",
     version="1.0.0",
     lifespan=lifespan,
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5500",
+        "http://localhost:5173",
+        "http://localhost:5174",
+    ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 app.mount("/static", StaticFiles(directory=STATIC_DIRECTORY), name="static")
@@ -104,4 +110,4 @@ def health_check():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

@@ -46,6 +46,15 @@ class PaymentInDTO(BaseModel):
 
 
 class CheckoutInDTO(BaseModel):
+    product_id: Annotated[
+        int,
+        ValidationAnnotation(suggestion="Use a product ID returned by GET /api/v1/products."),
+    ]
+    quantity: Annotated[
+        int,
+        Field(ge=1, le=5),
+        ValidationAnnotation(suggestion="Enter a whole number within the allowed range."),
+    ]
     customer: CustomerInDTO
     delivery_address: DeliveryAddressInDTO
     payment: PaymentInDTO

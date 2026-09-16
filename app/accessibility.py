@@ -8,6 +8,7 @@ class AccessibilityNudgeType(str, Enum):
     SEMANTIC_RELATIONSHIP = "semantic-relationship"
     HEADING = "heading"
     ACCESSIBLE_NAME = "accessible-name"
+    VISIBLE_LABEL = "visible-label"
     STATUS_MESSAGE = "status-message"
     ERROR_IDENTIFICATION = "error-identification"
     ERROR_SUGGESTION = "error-suggestion"

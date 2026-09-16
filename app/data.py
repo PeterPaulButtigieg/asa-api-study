@@ -21,7 +21,6 @@ PRODUCTS = {
     },
 }
 
-CARTS: dict[str, dict] = {}
 ORDERS: dict[str, dict] = {}
 
 SUCCESSFUL_TEST_CARD = "4242424242424242"
